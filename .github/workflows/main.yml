@@ -1,0 +1,57 @@
+name: CI-CD Deploy VM Azure
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  CI:
+    name: CI - Validação dos arquivos de configuração do Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código fonte
+        uses: actions/checkout@v3
+
+      - name: Configurar o Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_version: 1.11.4
+
+      - name: Inicializar as depêndencias do Terraform
+        run: terraform init
+
+      - name: Validar os arquivos de configuração do Terraform
+        run: terraform validate
+
+      - name: Gerar plano de execução do Terraform
+        run: terraform plan -out=tfplan
+
+  CD:
+    name: CD - Deploy da VM no Azure
+    needs: CI
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+
+    steps:
+      - name: Checkout do código fonte
+        uses: actions/checkout@v4.2.2
+
+      - name: Configurar o Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_version: 1.11.4
+
+      - name: Configurar credenciais do Azure
+        uses: azure/login@v2.3.0
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Inicializar o Terraform
+        run: terraform init
+
+      - name: Aplicar o plano de execução do Terraform (Deploy)
+        run: terraform apply -auto-approve tfplan
+
+      - name: Salvar estado remoto do Terraform
+        run: terraform state push
