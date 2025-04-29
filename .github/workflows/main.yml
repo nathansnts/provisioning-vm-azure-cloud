@@ -53,6 +53,9 @@ jobs:
       - name: Inicializar o Terraform
         run: terraform init
 
+      - name: Criar arquivo terraform.tfvars
+        run: echo "${{secrets.TFVARS_CREDENTIALS_VM}}" >> terraform.tfvars
+
       - name: Aplicar o plano de execução do Terraform (Deploy)
         run: terraform apply -input=false -var-file="terraform.tfvars"
 
