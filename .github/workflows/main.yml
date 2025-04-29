@@ -24,13 +24,8 @@ jobs:
       - name: Validar os arquivos de configuração do Terraform
         run: terraform validate
 
-      - name: Criar arquivo terraform.tfvars
-        run: |
-          echo "admin_username=${{secrets.TFVARS_USERNAME_VM}}" >> terraform.tfvars
-          echo "admin_password=${{secrets.TFVARS_PASSWORD_VM}}" >> terraform.tfvars
-
       - name: Gerar plano de execução do Terraform
-        run: terraform plan -input=false -var-file="terraform.tfvars" -out=tfplan
+        run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -out=tfplan
 
   CD:
     name: CD - Deploy da VM no Azure
@@ -55,13 +50,5 @@ jobs:
       - name: Inicializar o Terraform
         run: terraform init
 
-      - name: Criar arquivo terraform.tfvars
-        run: |
-          echo "${{secrets.TFVARS_USERNAME_VM}}" >> terraform.tfvars
-          echo "${{secrets.TFVARS_PASSWORD_VM}}" >> terraform.tfvars
-
       - name: Aplicar o plano de execução do Terraform (Deploy)
-        run: terraform apply -input=false -auto-approve -var-file="terraform.tfvars" tfplan
-
-      - name: Salvar estado remoto do Terraform
-        run: terraform state push
+        run: terraform apply -input=false -auto-approve -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" tfplan
