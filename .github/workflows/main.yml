@@ -25,7 +25,9 @@ jobs:
         run: terraform validate
 
       - name: Criar arquivo terraform.tfvars
-        run: echo "${{secrets.TFVARS_CREDENTIALS_VM}}" >> terraform.tfvars
+        run: |
+          echo "${{secrets.TFVARS_USERNAME_VM}}" >> terraform.tfvars
+          echo "${{secrets.TFVARS_PASSWORD_VM}}" >> terraform.tfvars
 
       - name: Gerar plano de execução do Terraform
         run: terraform plan -input=false -var-file="terraform.tfvars"
@@ -54,7 +56,9 @@ jobs:
         run: terraform init
 
       - name: Criar arquivo terraform.tfvars
-        run: echo "${{secrets.TFVARS_CREDENTIALS_VM}}" >> terraform.tfvars
+        run: |
+          echo "${{secrets.TFVARS_USERNAME_VM}}" >> terraform.tfvars
+          echo "${{secrets.TFVARS_PASSWORD_VM}}" >> terraform.tfvars
 
       - name: Aplicar o plano de execução do Terraform (Deploy)
         run: terraform apply -input=false -var-file="terraform.tfvars"
