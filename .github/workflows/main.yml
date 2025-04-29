@@ -51,7 +51,7 @@ jobs:
         run: terraform init
 
       - name: Aplicar o plano de execução do Terraform (Deploy)
-        run: terraform apply -input=false -var-file="deploy_azure_vm_terraform/terraform.tfvars"
+        run: terraform apply -input=false -var-file="./deploy_azure_vm_terraform/terraform.tfvars"
 
       - name: Salvar estado remoto do Terraform
         run: terraform state push
