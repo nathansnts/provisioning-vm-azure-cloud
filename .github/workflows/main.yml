@@ -16,7 +16,7 @@ jobs:
       - name: Configurar o Terraform
         uses: hashicorp/setup-terraform@v2.0.3
         with:
-          terraform_version: 1.11.4
+          terraform_version: 2.0.3
 
       - name: Inicializar as depêndencias do Terraform
         run: terraform init
@@ -40,7 +40,7 @@ jobs:
       - name: Configurar o Terraform
         uses: hashicorp/setup-terraform@v2.0.3
         with:
-          terraform_version: 1.11.4
+          terraform_version: 2.0.3
 
       - name: Configurar credenciais do Azure
         uses: azure/login@v2.3.0
