@@ -32,6 +32,12 @@ jobs:
       - name: Gerar plano de execução do Terraform
         run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -out=tfplan
 
+      - name: Salvar tfplan como artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: tfplan
+
   CD:
     name: CD - Deploy da VM no Azure
     needs: CI
@@ -54,6 +60,11 @@ jobs:
 
       - name: Inicializar o Terraform
         run: terraform init
+
+      - name: Baixar o tfplan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
 
       - name: Aplicar o plano de execução do Terraform (Deploy)
         run: terraform apply -input=false -auto-approve -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" tfplan
