@@ -33,7 +33,7 @@ jobs:
         run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -out=tfplan
 
       - name: Salvar tfplan como artefato
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: tfplan
@@ -62,7 +62,7 @@ jobs:
         run: terraform init
 
       - name: Baixar o tfplan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
 
