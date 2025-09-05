@@ -5,66 +5,121 @@ on:
     branches: ["main"]
 
 jobs:
+  security:
+    name: Security Check - Checkov
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Install Python 3.8
+        uses: actions/setup-python@v4 
+        with:
+          python-version: 3.8
+
+      - name: Security Analysis with Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          output_format: cli,sarif,json
+          output_file_path: checkov-report.txt,results.sarif,checkov.json
+          quiet: true
+          soft_fail: true
+          download_external_modules: true
+          log_level: WARNING
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        if: success() || failure()
+        with:
+          sarif_file: results.sarif
+          
+      - name: Upload Checkov Report
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: checkov-reports
+          path: |
+            checkov-report.txt
+            checkov.json
+
   CI:
-    name: CI - Validação dos arquivos de configuração do Terraform
+    name: CI - Terraform Configuration Validation
+    needs: security
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código fonte
+      - name: Checkout source code
         uses: actions/checkout@v3
 
-      - name: Configurar o Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.3
         with:
           terraform_version: 1.11.4
 
-      - name: Configurar credenciais do Azure
+      - name: Configure Azure credentials
         uses: azure/login@v2.3.0
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
 
-      - name: Inicializar as depêndencias do Terraform
-        run: terraform init
+      - name: Initialize Terraform dependencies
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.BACKEND_RESOURCE_GROUP_NAME }}" \
+            -backend-config="storage_account_name=${{ secrets.BACKEND_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ secrets.BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ secrets.BACKEND_KEY_CONFIG }}"
 
-      - name: Validar os arquivos de configuração do Terraform
+      - name: Validate Terraform configuration
         run: terraform validate
+      
+      - name: Check Terraform formatting
+        run: terraform fmt -check
 
-      - name: Gerar plano de execução do Terraform
+      - name: Generate Terraform execution plan
         run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -out=tfplan
 
-      - name: Salvar tfplan como artefato
+      - name: Save tfplan as artifact
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: tfplan
 
   CD:
-    name: CD - Deploy da VM no Azure
+    name: CD - Deploy Azure VM
     needs: CI
     runs-on: ubuntu-latest
     if: ${{ success() }}
 
     steps:
-      - name: Checkout do código fonte
+      - name: Checkout source code
         uses: actions/checkout@v4.2.2
 
-      - name: Configurar o Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.3
         with:
           terraform_version: 1.11.4
 
-      - name: Configurar credenciais do Azure
+      - name: Configure Azure credentials
         uses: azure/login@v2.3.0
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
 
-      - name: Inicializar o Terraform
-        run: terraform init
+      - name: Initialize Terraform
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ secrets.BACKEND_RESOURCE_GROUP_NAME }}" \
+            -backend-config="storage_account_name=${{ secrets.BACKEND_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ secrets.BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ secrets.BACKEND_KEY_CONFIG }}"
 
-      - name: Baixar o tfplan
+      - name: Download tfplan
         uses: actions/download-artifact@v4
         with:
           name: tfplan
 
-      - name: Aplicar o plano de execução do Terraform (Deploy)
+      - name: Apply Terraform execution plan
         run: terraform apply -input=false -auto-approve -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" tfplan
