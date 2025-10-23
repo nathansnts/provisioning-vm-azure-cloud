@@ -34,21 +34,33 @@ variable "subnet_prefix" {
   default     = "10.0.1.0/24"
 }
 
-variable "vm_name" {
-  description = "Nome da Virtual Machine"
-  type        = string
-  default     = "vm-test"
-}
-
-variable "vm_size" {
-  description = "Tamanho da Virtual Machine"
-  type        = string
-  default     = "Standard_B1ms"
+variable "virtual_machines" {
+  description = "Lista de máquinas virtuais para criar"
+  type = map(object({
+    name = string
+    size = string
+  }))
+  default = {
+    "vm1" = {
+      name = "vm-test1"
+      size = "Standard_B1ms"
+    }
+    "vm2" = {
+      name = "vm-test2"
+      size = "Standard_B1ms"
+    }
+  }
 }
 
 variable "admin_username" {
   description = "Usuário administrador da VM"
   type        = string
+}
+
+variable "allowed_ip" {
+  description = "Endereço IP permitido para acesso (ex: seu IP público)"
+  type        = string
+  default     = "0.0.0.0"  # Por padrão permite todos os IPs (Não recomendado para produção)
 }
 
 variable "admin_password" {

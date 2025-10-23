@@ -27,3 +27,8 @@ variable "subnet_prefix" {
   description = "Prefixo da Subnet"
   type        = string
 }
+
+variable "allowed_ip" {
+  description = "Endereço IP permitido para acesso (ex: seu IP público)"
+  type        = string
+}

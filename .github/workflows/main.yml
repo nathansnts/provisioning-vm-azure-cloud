@@ -86,7 +86,7 @@ jobs:
         run: terraform fmt -check
 
       - name: Generate Terraform execution plan
-        run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -out=tfplan
+        run: terraform plan -input=false -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -var="allowed_ip=${{secrets.TFVARS_ALLOWED_IP}}" -out=tfplan
 
       - name: Save tfplan as artifact
         uses: actions/upload-artifact@v4
@@ -128,4 +128,4 @@ jobs:
           name: tfplan
 
       - name: Apply Terraform execution plan
-        run: terraform apply -input=false -auto-approve -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" tfplan
+        run: terraform apply -input=false -auto-approve -var="admin_username=${{secrets.TFVARS_USERNAME_VM}}" -var="admin_password=${{secrets.TFVARS_PASSWORD_VM}}" -var="allowed_ip=${{secrets.TFVARS_ALLOWED_IP}}" tfplan

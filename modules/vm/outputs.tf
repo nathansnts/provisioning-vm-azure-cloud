@@ -8,6 +8,11 @@ output "nic_id" {
   value       = azurerm_network_interface.nic.id
 }
 
+output "public_ip" {
+  description = "Endereço IP público da VM"
+  value       = azurerm_public_ip.pip.ip_address
+}
+
 
 output "ip_vm" {
   description = "IP da Virtual Machine"

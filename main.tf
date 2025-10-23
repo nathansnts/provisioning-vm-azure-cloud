@@ -12,15 +12,18 @@ module "network" {
   address_space       = var.address_space
   subnet_name         = var.subnet_name
   subnet_prefix       = var.subnet_prefix
+  allowed_ip          = var.allowed_ip
 }
 
 module "vm" {
   source              = "./modules/vm"
+  for_each           = var.virtual_machines
+  
   resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   subnet_id           = module.network.subnet_id
-  vm_name             = var.vm_name
-  vm_size             = var.vm_size
+  vm_name             = each.value.name
+  vm_size             = each.value.size
   admin_username      = var.admin_username
   admin_password      = var.admin_password
   os_disk_size_gb     = var.os_disk_size_gb
