@@ -16,9 +16,9 @@ module "network" {
 }
 
 module "vm" {
-  source              = "./modules/vm"
-  for_each           = var.virtual_machines
-  
+  source   = "./modules/vm"
+  for_each = var.virtual_machines
+
   resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   subnet_id           = module.network.subnet_id

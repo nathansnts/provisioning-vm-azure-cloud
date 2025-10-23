@@ -60,7 +60,7 @@ variable "admin_username" {
 variable "allowed_ip" {
   description = "Endereço IP permitido para acesso (ex: seu IP público)"
   type        = string
-  default     = "0.0.0.0"  # Por padrão permite todos os IPs (Não recomendado para produção)
+  default     = "0.0.0.0" # Por padrão permite todos os IPs (Não recomendado para produção)
 }
 
 variable "admin_password" {
